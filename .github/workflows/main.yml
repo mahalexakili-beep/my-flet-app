@@ -12,17 +12,23 @@ jobs:
       - name: Install Flet
         run: pip install "flet[cli]"
       - name: Extract Project
-        run: unzip nour1.py.zip
+        run: |
+          unzip nour1.py.zip -d project_files
+          ls -R project_files
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       - name: Build APK
         run: |
-          cd nour1.py
+          # البحث عن مكان ملف main.py الفعلي وتشغيل البناء من مجلده
+          TARGET_DIR=$(find project_files -name "main.py" -exec dirname {} \;)
+          echo "Project directory found at: $TARGET_DIR"
+          cd "$TARGET_DIR"
           flet build apk main.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: nour1.py/build/apk/app-release.apk
+          path: |
+            project_files/**/build/apk/app-release.apk
